@@ -34,6 +34,7 @@ public class Cart {
     private Integer count;    // 商品数量
     private List<String> skuName; // 规格名称
     private Integer stock;    // 库存
+    private Boolean selected; // 是否选中
     private Date createTime;  // 创建时间
     private Date updateTime;  // 更新时间
 

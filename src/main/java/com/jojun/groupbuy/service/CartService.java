@@ -31,18 +31,36 @@ public interface CartService {
 
     /**
      * 更新购物车商品数量
-     * @param id 购物车ID
+     * @param skuId 单品Id
      * @param count 数量
      * @return 是否更新成功
      */
-    boolean updateCartItemCount(Long id, Integer count);
+    boolean updateCartItemCount(String userId, String skuId, Integer count);
+
+    /**
+     * 更新购物车商品选中状态
+     * @param userId 用户ID
+     * @param skuId 单品Id
+     * @param selected 是否选中
+     * @return 是否更新成功
+     */
+    boolean updateCartItemSelected(String userId, String skuId, Boolean selected);
 
     /**
      * 删除购物车商品
-     * @param id 购物车ID
+     * @param userId 用户ID
+     * @param skuId 单品Id
      * @return 是否删除成功
      */
-    boolean deleteCartItem(Long id);
+    boolean deleteCartItem(String userId, String skuId);
+
+    /**
+     * 更新用户所有购物车商品选中状态
+     * @param userId 用户ID
+     * @param selected 是否选中
+     * @return 是否更新成功
+     */
+    boolean updateAllCartItemsSelected(String userId, Boolean selected);
 
     /**
      * 清空用户购物车

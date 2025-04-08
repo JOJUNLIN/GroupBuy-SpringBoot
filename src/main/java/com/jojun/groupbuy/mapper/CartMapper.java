@@ -21,8 +21,8 @@ public interface CartMapper {
      * @param cart 购物车数据
      * @return 影响行数
      */
-    @Insert("INSERT INTO user_cart (user_id, sku_id, goods_id, goods_name, image, price, count, sku_name, stock) " +
-            "VALUES (#{userId}, #{skuId}, #{goodsId}, #{goodsName}, #{image}, #{price}, #{count}, #{skuNameJson}, #{stock})")
+    @Insert("INSERT INTO user_cart (user_id, sku_id, goods_id, goods_name, image, price, count, sku_name, stock, selected) " +
+            "VALUES (#{userId}, #{skuId}, #{goodsId}, #{goodsName}, #{image}, #{price}, #{count}, #{skuNameJson}, #{stock}, #{selected} )")
     int add(Cart cart);
 
     /**
@@ -39,12 +39,23 @@ public interface CartMapper {
 
     /**
      * 更新购物车商品数量
-     * @param id 购物车ID
+     * @param userId 用户ID
+     * @param skuId 单品Id
      * @param count 数量
      * @return 影响行数
      */
-    @Update("UPDATE user_cart SET count = #{count} WHERE id = #{id}")
-    int updateCount(@Param("id") Long id, @Param("count") Integer count);
+    @Update("UPDATE user_cart SET count = #{count} WHERE user_Id = #{userId} AND sku_Id = #{skuId} ")
+    int updateCount(@Param("userId") String userId, @Param("skuId") String skuId, @Param("count") Integer count);
+
+    /**
+     * 更新购物车商品选中状态
+     * @param userId 用户ID
+     * @param skuId 单品Id
+     * @param selected 是否选中
+     * @return 影响行数
+     */
+    @Update("UPDATE user_cart SET selected = #{selected} WHERE user_id = #{userId} AND sku_id = #{skuId}")
+    int updateSelected(@Param("userId") String userId, @Param("skuId") String skuId, @Param("selected") Boolean selected);
 
     /**
      * 获取用户购物车列表
@@ -59,11 +70,21 @@ public interface CartMapper {
 
     /**
      * 删除购物车商品
-     * @param id 购物车ID
+     * @param userId 用户ID
+     * @param skuId 单品Id
      * @return 影响行数
      */
-    @Delete("DELETE FROM user_cart WHERE id = #{id}")
-    int deleteById(Long id);
+    @Delete("DELETE FROM user_cart WHERE user_Id = #{userId} AND sku_Id = #{skuId} ")
+    int deleteById(@Param("userId") String userId, @Param("skuId") String skuId);
+
+    /**
+     * 更新用户所有购物车商品选中状态
+     * @param userId 用户ID
+     * @param selected 是否选中
+     * @return 影响行数
+     */
+    @Update("UPDATE user_cart SET selected = #{selected} WHERE user_id = #{userId}")
+    int updateAllSelected(@Param("userId") String userId, @Param("selected") Boolean selected);
 
     /**
      * 清空用户购物车

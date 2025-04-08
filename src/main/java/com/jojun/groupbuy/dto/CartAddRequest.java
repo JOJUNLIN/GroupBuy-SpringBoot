@@ -42,4 +42,6 @@ public class CartAddRequest {
 
     private Integer stock;   // 库存
 
+    private Boolean selected = false; // 是否选中，默认为false
+
 }
