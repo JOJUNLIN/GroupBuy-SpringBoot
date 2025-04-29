@@ -87,6 +87,14 @@ public interface CartMapper {
     int updateAllSelected(@Param("userId") String userId, @Param("selected") Boolean selected);
 
     /**
+     * 删除购物车中选中的商品
+     * @param userId 用户ID
+     * @return 影响的行数
+     */
+    @Delete("DELETE FROM user_cart WHERE user_id = #{userId} AND selected = 1")
+    int deleteSelectedByUserId(String userId);
+
+    /**
      * 清空用户购物车
      * @param userId 用户ID
      * @return 影响行数
