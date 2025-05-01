@@ -27,7 +27,7 @@ public class Order {
     /** 收货地址ID */
     private Integer addressId;
 
-    /** 订单状态，1为待付款、2为待发货、3为待收货、4为待评价、5为已完成、6为已取消 */
+    /** 订单状态，1为待付款、2为待发货、3为待收货、4为配送中、5为已完成 */
     private Integer orderState;
 
     /** 商品总价 */

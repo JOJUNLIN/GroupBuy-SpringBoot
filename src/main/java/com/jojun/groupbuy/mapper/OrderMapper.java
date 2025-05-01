@@ -3,6 +3,8 @@ package com.jojun.groupbuy.mapper;
 import com.jojun.groupbuy.pojo.Order;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 /**
  * @interfaceName: OrderMapper
  * @author: JOJUN-CJL
@@ -47,4 +49,39 @@ public interface OrderMapper {
      */
     @Update("UPDATE `order` SET order_state = #{state}, update_time = NOW() WHERE id = #{id}")
     int updateOrderState(@Param("id") String id, @Param("state") Integer state);
+
+    /**
+     * 根据用户ID和订单状态查询订单列表
+     * @param userId 用户ID
+     * @param orderState 订单状态，0表示查询全部
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 订单列表
+     */
+    @Select("<script>" +
+            "SELECT * FROM `order` WHERE user_id = #{userId} " +
+            "<if test='orderState != null and orderState > 0'>" +
+            "AND order_state = #{orderState} " +
+            "</if>" +
+            "ORDER BY create_time DESC " +
+            "LIMIT #{offset}, #{limit}" +
+            "</script>")
+    List<Order> findByUserIdAndOrderState(@Param("userId") String userId,
+                                          @Param("orderState") Integer orderState,
+                                          @Param("offset") Integer offset,
+                                          @Param("limit") Integer limit);
+
+    /**
+     * 根据用户ID和订单状态统计订单数量
+     * @param userId 用户ID
+     * @param orderState 订单状态，0表示查询全部
+     * @return 订单数量
+     */
+    @Select("<script>" +
+            "SELECT COUNT(*) FROM `order` WHERE user_id = #{userId} " +
+            "<if test='orderState != null and orderState > 0'>" +
+            "AND order_state = #{orderState} " +
+            "</if>" +
+            "</script>")
+    Long countByUserIdAndOrderState(@Param("userId") String userId, @Param("orderState") Integer orderState);
 }

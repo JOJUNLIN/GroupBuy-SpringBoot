@@ -1,9 +1,6 @@
 package com.jojun.groupbuy.service;
 
-import com.jojun.groupbuy.dto.OrderCreateParams;
-import com.jojun.groupbuy.dto.OrderCreateResult;
-import com.jojun.groupbuy.dto.OrderPreResult;
-import com.jojun.groupbuy.dto.OrderResult;
+import com.jojun.groupbuy.dto.*;
 
 /**
  * @interfaceName: OrderService
@@ -36,4 +33,22 @@ public interface OrderService {
      * @return 订单详情
      */
     OrderResult getOrderById(String userId, String id);
+
+    /**
+     * 更新订单状态
+     * @param orderId 订单ID
+     * @param state 订单状态
+     * @return 是否更新成功
+     */
+    boolean updateOrderState(String orderId, Integer state);
+
+    /**
+     * 获取订单列表
+     * @param userId 用户ID
+     * @param page 页码
+     * @param pageSize 每页条数
+     * @param orderState 订单状态，0表示查询全部
+     * @return 订单列表结果
+     */
+    OrderListResult getOrderList(String userId, Integer page, Integer pageSize, Integer orderState);
 }

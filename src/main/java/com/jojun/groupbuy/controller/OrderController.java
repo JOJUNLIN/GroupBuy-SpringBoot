@@ -1,12 +1,9 @@
 package com.jojun.groupbuy.controller;
 
-import com.jojun.groupbuy.dto.OrderPreResult;
+import com.jojun.groupbuy.dto.*;
 import com.jojun.groupbuy.pojo.Result;
 import com.jojun.groupbuy.service.OrderService;
 import com.jojun.groupbuy.utils.JwtUtil;
-import com.jojun.groupbuy.dto.OrderCreateParams;
-import com.jojun.groupbuy.dto.OrderCreateResult;
-import com.jojun.groupbuy.dto.OrderResult;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -141,6 +138,44 @@ public class OrderController {
         } catch (Exception e) {
             e.printStackTrace();
             return Result.fail("获取订单详情失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取订单列表
+     * @param page 页码，默认为1
+     * @param pageSize 每页显示数量，默认为10
+     * @param orderState 订单状态，0表示全部
+     * @param request HTTP请求对象，用于获取请求头中的 token
+     * @return 订单列表结果
+     */
+    @GetMapping("/list")
+    public Result<OrderListResult> getOrderList(
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "orderState", required = false, defaultValue = "0") Integer orderState,
+            HttpServletRequest request) {
+        try {
+            // 从请求头获取 token
+            String token = request.getHeader("Authorization");
+            if (token == null || token.isEmpty()) {
+                return Result.fail("未提供登录凭证");
+            }
+
+            // 解析 token 获取用户ID
+            Map<String, Object> claims = JwtUtil.parseToken(token);
+            Integer userId = (Integer) claims.get("id");
+
+            if (userId == null) {
+                return Result.fail("无效的用户信息");
+            }
+
+            // 获取订单列表
+            OrderListResult result = orderService.getOrderList(userId.toString(), page, pageSize, orderState);
+            return Result.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.fail("获取订单列表失败: " + e.getMessage());
         }
     }
 }

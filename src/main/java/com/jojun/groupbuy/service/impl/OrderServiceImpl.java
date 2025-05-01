@@ -13,6 +13,7 @@ import com.jojun.groupbuy.service.OrderService;
 import com.jojun.groupbuy.dto.*;
 import com.jojun.groupbuy.pojo.Order;
 import com.jojun.groupbuy.pojo.OrderGoods;
+import com.jojun.groupbuy.service.AddressService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
 //        BigDecimal postFee = BigDecimal.ZERO; // 邮费，可以根据业务规则设置
         BigDecimal postFee = new BigDecimal("500");
         BigDecimal totalPayPrice = totalPrice.add(postFee);
-        // 将三个参数都除以100
+        // 将三个参数都除以100后再传给前端
         BigDecimal divisor = new BigDecimal("100");
         postFee = postFee.divide(divisor, 2, BigDecimal.ROUND_HALF_UP); // 保留两位小数，四舍五入
         totalPrice = totalPrice.divide(divisor, 2, BigDecimal.ROUND_HALF_UP);
@@ -180,10 +181,13 @@ public class OrderServiceImpl implements OrderService {
         // 查询订单商品信息
         List<OrderGoods> orderGoodsList = orderGoodsMapper.findByOrderId(id);
 
+        // 根据地址id查询地址
+
         // 构建返回结果
         OrderResult result = new OrderResult();
         result.setId(order.getId());
         result.setOrderState(order.getOrderState());
+        result.setAddress(addressMapper.findById(order.getAddressId()));
         result.setCreateTime(formatTime(order.getCreateTime()));
         result.setTotalMoney(order.getTotalMoney());
         result.setPostFee(order.getPostFee());
@@ -206,6 +210,99 @@ public class OrderServiceImpl implements OrderService {
         result.setSkus(skus);
 
         return result;
+    }
+
+    /**
+     * 更新订单状态
+     * @param orderId 订单ID
+     * @param state 订单状态
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateOrderState(String orderId, Integer state) {
+        // 查询订单是否存在
+        Order order = orderMapper.findById(orderId);
+        if (order == null) {
+            return false;
+        }
+
+        // 更新订单状态
+        int result = orderMapper.updateOrderState(orderId, state);
+        return result > 0;
+    }
+
+    /**
+     * 获取订单列表
+     * @param userId 用户ID
+     * @param page 页码
+     * @param pageSize 每页条数
+     * @param orderState 订单状态，0表示查询全部
+     * @return 订单列表结果
+     */
+    @Override
+    public OrderListResult getOrderList(String userId, Integer page, Integer pageSize, Integer orderState) {
+        // 设置默认值
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        if (pageSize == null || pageSize < 1) {
+            pageSize = 10;
+        }
+
+        // 计算偏移量
+        int offset = (page - 1) * pageSize;
+
+        // 查询订单数据
+        List<Order> orders = orderMapper.findByUserIdAndOrderState(userId, orderState, offset, pageSize);
+
+        // 查询总记录数
+        Long totalCount = orderMapper.countByUserIdAndOrderState(userId, orderState);
+
+        // 计算总页数
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        // 转换为前端需要的数据格式
+        List<OrderItem> items = new ArrayList<>();
+        for (Order order : orders) {
+            // 查询订单商品信息
+            List<OrderGoods> orderGoodsList = orderGoodsMapper.findByOrderId(order.getId());
+
+            // 转换商品列表
+            List<OrderSkuItem> skus = new ArrayList<>();
+            int totalNum = 0; // 计算总件数
+
+            for (OrderGoods goods : orderGoodsList) {
+                OrderSkuItem sku = new OrderSkuItem();
+                sku.setSkuId(goods.getSkuId());
+                sku.setGoodsId(goods.getGoodsId());
+                sku.setGoodsName(goods.getGoodsName());
+                sku.setSkuName(goods.getSkuName());
+                sku.setCount(goods.getCount());
+                sku.setPrice(goods.getPrice());
+                sku.setImage(goods.getImage());
+
+                skus.add(sku);
+                totalNum += goods.getCount(); // 累加商品数量
+            }
+
+            // 创建OrderItem对象
+            OrderItem item = new OrderItem();
+            item.setId(order.getId());
+            item.setOrderState(order.getOrderState());
+            item.setSkus(skus);
+            item.setAddress(addressMapper.findById(order.getAddressId()));
+            item.setCreateTime(formatTime(order.getCreateTime()));
+            item.setTotalMoney(order.getTotalMoney());
+            item.setPostFee(order.getPostFee());
+            item.setPayMoney(order.getPayMoney());
+            item.setTotalNum(totalNum);
+
+            items.add(item);
+        }
+
+        // 创建并返回结果
+        return new OrderListResult(totalCount, items, page, totalPages, pageSize);
     }
 
     /**

@@ -18,4 +18,5 @@ public interface AddressService {
      * @return 地址列表
      */
     List<AddressItem> getAddressList();
+
 }

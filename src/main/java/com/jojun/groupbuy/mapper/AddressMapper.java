@@ -29,4 +29,14 @@ public interface AddressMapper {
             @Result(property = "group_num", column = "group_num")
     })
     List<AddressItem> findAddress();
+
+    /**
+     * 根据地址id查询地址
+     * @return 地址
+     */
+    @Select("SELECT address FROM group_address WHERE id = #{id}")
+    @Results({
+            @Result(property = "address", column = "address")
+    })
+    String findById(int id);
 }

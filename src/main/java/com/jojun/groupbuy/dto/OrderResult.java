@@ -27,6 +27,9 @@ public class OrderResult {
     /** 商品集合 [ 商品信息 ] */
     private List<OrderSkuItem> skus;
 
+    /** 地址 */
+    private String address;
+
     /** 下单时间 */
     private String createTime;
 
