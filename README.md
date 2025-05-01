@@ -30,7 +30,7 @@
 
 [https://github.com/JOJUNLIN/GroupBuy-SpringBoot.git](https://github.com/JOJUNLIN/GroupBuy-SpringBoot.git)
 
-### 📦 小程序项目源码（更新中）
+### 📦 小程序项目源码（已完结）
 
 [https://github.com/JOJUNLIN/GroupBuy-UniApp.git](https://github.com/JOJUNLIN/GroupBuy-UniApp.git)
 
