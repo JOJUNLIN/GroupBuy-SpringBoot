@@ -19,4 +19,10 @@ public interface AddressService {
      */
     List<AddressItem> getAddressList();
 
+    /**
+     * 新增站点
+     * @param addressItem 包含站点信息的对象
+     * @return 返回创建的站点对象 (可能包含生成的ID)
+     */
+    AddressItem addSite(AddressItem addressItem);
 }

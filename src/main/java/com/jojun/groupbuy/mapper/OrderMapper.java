@@ -84,4 +84,82 @@ public interface OrderMapper {
             "</if>" +
             "</script>")
     Long countByUserIdAndOrderState(@Param("userId") String userId, @Param("orderState") Integer orderState);
+
+    /**
+     * (管理员) 查询所有订单 (可按状态过滤，可分页)
+     * @param orderState 订单状态 (null 或 0 表示查询全部)
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 订单列表
+     */
+    @Select("<script>" +
+            "SELECT * FROM `order` " +
+            "<where>" +
+            "  <if test='orderState != null and orderState > 0'>" +
+            "    AND order_state = #{orderState} " +
+            "  </if>" +
+            "</where>" +
+            "ORDER BY create_time DESC " +
+            "LIMIT #{offset}, #{limit}" +
+            "</script>")
+    List<Order> findAllOrdersForAdmin(@Param("orderState") Integer orderState,
+                                      @Param("offset") Integer offset,
+                                      @Param("limit") Integer limit);
+
+    /**
+     * (管理员) 统计所有订单数量 (可按状态过滤)
+     * @param orderState 订单状态 (null 或 0 表示查询全部)
+     * @return 订单数量
+     */
+    @Select("<script>" +
+            "SELECT COUNT(*) FROM `order` " +
+            "<where>" +
+            "  <if test='orderState != null and orderState > 0'>" +
+            "    AND order_state = #{orderState} " +
+            "  </if>" +
+            "</where>" +
+            "</script>")
+    Long countAllOrdersForAdmin(@Param("orderState") Integer orderState);
+
+    /**
+     * (管理员) 根据站点ID查询订单 (可按状态过滤，可分页)
+     * @param addressId 站点ID (收货地址ID)
+     * @param orderState 订单状态 (null 或 0 表示查询全部)
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 订单列表
+     */
+    @Select("<script>" +
+            "SELECT * FROM `order` " +
+            "<where>" +
+            "  address_id = #{addressId} " +
+            "  <if test='orderState != null and orderState > 0'>" +
+            "    AND order_state = #{orderState} " +
+            "  </if>" +
+            "</where>" +
+            "ORDER BY create_time DESC " +
+            "LIMIT #{offset}, #{limit}" +
+            "</script>")
+    List<Order> findOrdersByAddressIdForAdmin(@Param("addressId") Integer addressId,
+                                              @Param("orderState") Integer orderState,
+                                              @Param("offset") Integer offset,
+                                              @Param("limit") Integer limit);
+
+    /**
+     * (管理员) 根据站点ID统计订单数量 (可按状态过滤)
+     * @param addressId 站点ID (收货地址ID)
+     * @param orderState 订单状态 (null 或 0 表示查询全部)
+     * @return 订单数量
+     */
+    @Select("<script>" +
+            "SELECT COUNT(*) FROM `order` " +
+            "<where>" +
+            "  address_id = #{addressId} " +
+            "  <if test='orderState != null and orderState > 0'>" +
+            "    AND order_state = #{orderState} " +
+            "  </if>" +
+            "</where>" +
+            "</script>")
+    Long countOrdersByAddressIdForAdmin(@Param("addressId") Integer addressId,
+                                        @Param("orderState") Integer orderState);
 }

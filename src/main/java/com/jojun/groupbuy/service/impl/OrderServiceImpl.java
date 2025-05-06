@@ -13,7 +13,6 @@ import com.jojun.groupbuy.service.OrderService;
 import com.jojun.groupbuy.dto.*;
 import com.jojun.groupbuy.pojo.Order;
 import com.jojun.groupbuy.pojo.OrderGoods;
-import com.jojun.groupbuy.service.AddressService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -326,5 +325,84 @@ public class OrderServiceImpl implements OrderService {
             return "";
         }
         return time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    /**
+     * (管理员) 获取所有订单列表
+     * @param page 页码
+     * @param pageSize 每页条数
+     * @param orderState 订单状态，null或0表示查询全部
+     * @return 管理员订单列表结果
+     */
+    @Override
+    public AdminOrderListResultDto getAllOrdersForAdmin(Integer page, Integer pageSize, Integer orderState) {
+        page = (page == null || page < 1) ? 1 : page;
+        pageSize = (pageSize == null || pageSize < 1) ? 10 : pageSize;
+        int offset = (page - 1) * pageSize;
+
+        List<Order> orders = orderMapper.findAllOrdersForAdmin(orderState, offset, pageSize);
+        Long totalCount = orderMapper.countAllOrdersForAdmin(orderState);
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        List<AdminOrderItemDto> adminOrderItems = orders.stream()
+                .map(this::convertToAdminOrderItemDto)
+                .collect(Collectors.toList());
+
+        return new AdminOrderListResultDto(totalCount, adminOrderItems, page, totalPages, pageSize);
+    }
+
+    /**
+     * (管理员) 根据站点ID获取订单列表
+     * @param addressId 站点ID
+     * @param page 页码
+     * @param pageSize 每页条数
+     * @param orderState 订单状态，null或0表示查询全部
+     * @return 管理员订单列表结果
+     */
+    @Override
+    public AdminOrderListResultDto getOrdersBySiteForAdmin(Integer addressId, Integer page, Integer pageSize, Integer orderState) {
+        if (addressId == null) {
+            return new AdminOrderListResultDto(0L, new ArrayList<>(), 1, 0, pageSize);
+        }
+        page = (page == null || page < 1) ? 1 : page;
+        pageSize = (pageSize == null || pageSize < 1) ? 10 : pageSize;
+        int offset = (page - 1) * pageSize;
+
+        List<Order> orders = orderMapper.findOrdersByAddressIdForAdmin(addressId, orderState, offset, pageSize);
+        Long totalCount = orderMapper.countOrdersByAddressIdForAdmin(addressId, orderState);
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        List<AdminOrderItemDto> adminOrderItems = orders.stream()
+                .map(this::convertToAdminOrderItemDto)
+                .collect(Collectors.toList());
+
+        return new AdminOrderListResultDto(totalCount, adminOrderItems, page, totalPages, pageSize);
+    }
+
+    /**
+     * 辅助方法：将 Order 实体转换为 AdminOrderItemDto
+     */
+    private AdminOrderItemDto convertToAdminOrderItemDto(Order order) {
+        if (order == null) {
+            return null;
+        }
+        AdminOrderItemDto dto = new AdminOrderItemDto();
+        dto.setId(order.getId());
+        dto.setUserId(order.getUserId()); // 直接使用 Order 中的 userId
+        dto.setOrderState(order.getOrderState());
+        dto.setCreateTime(formatTime(order.getCreateTime()));
+
+        // 获取站点地址
+        if (order.getAddressId() != null) {
+            String siteAddress = addressMapper.findById(order.getAddressId());
+            dto.setSiteAddress(siteAddress != null ? siteAddress : "未知站点");
+        } else {
+            dto.setSiteAddress("未指定站点");
+        }
+
+        // 如果需要用户名，可以在这里根据 order.getUserId() 查询并设置
+        // dto.setUserName(userService.getUserNameById(order.getUserId()));
+
+        return dto;
     }
 }

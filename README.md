@@ -2,11 +2,11 @@
 
 ## 更新中
 
-目前进度：小程序端所有接口完成
+目前进度：小程序端所有接口完成，web管理端实现一半功能的接口
 
 ## 项目简介
 
-这是团购毕设的后端SpringBoot，实现众多接口api
+这是团购毕设的后端SpringBoot，实现uniapp开发的小程序和vue3开发的web端接口api
 
 ### 技术栈
 
@@ -33,6 +33,10 @@
 ### 📦 小程序项目源码（已完结）
 
 [https://github.com/JOJUNLIN/GroupBuy-UniApp.git](https://github.com/JOJUNLIN/GroupBuy-UniApp.git)
+
+### 📦 web端Vue3项目源码（更新中）
+
+[https://github.com/JOJUNLIN/GroupBuy-Vue.git](https://github.com/JOJUNLIN/GroupBuy-Vue.git)
 
 
 

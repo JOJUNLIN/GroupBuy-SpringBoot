@@ -7,7 +7,7 @@ import com.jojun.groupbuy.pojo.User;
  * @author: JOJUN-CJL
  * @date: 2025/3/27
  * @Version: 1.0
- * @description:
+ * @description: 用户信息服务接口
  */
 
 public interface UserService {

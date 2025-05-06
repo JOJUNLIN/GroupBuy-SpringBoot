@@ -30,28 +30,28 @@ public class UserController {
 
     @PostMapping("/register")
     public Result register(String username, String password) {
-        //查询用户
+        // 查询用户
         User u = userService.findBYUserName(username);
         if (u == null) {
-            //没有占用
-            //注册
+            // 没有占用
+            // 注册
             userService.register(username,password);
             return Result.success();
         }else {
-            //占用
+            // 占用
             return Result.fail("用户已经被占用");
         }
     }
 
     @PostMapping("/login")
     public Result<String> login(String username, String password) {
-        //查询用户
+        // 查询用户
         User loginU = userService.findBYUserName(username);
-        //判断用户是否存在
+        // 判断用户是否存在
         if (loginU == null) {
             return Result.fail("用户名错误");
         }
-        //判断密码是否正确
+        // 判断密码是否正确
         if (loginU.getPassword().equals(password)) {
             //登录成功
             Map<String, Object> claims = new HashMap<>();

@@ -51,4 +51,23 @@ public interface OrderService {
      * @return 订单列表结果
      */
     OrderListResult getOrderList(String userId, Integer page, Integer pageSize, Integer orderState);
+
+    /**
+     * (管理员) 获取所有订单列表
+     * @param page 页码
+     * @param pageSize 每页条数
+     * @param orderState 订单状态，null或0表示查询全部
+     * @return 管理员订单列表结果
+     */
+    AdminOrderListResultDto getAllOrdersForAdmin(Integer page, Integer pageSize, Integer orderState);
+
+    /**
+     * (管理员) 根据站点ID获取订单列表
+     * @param addressId 站点ID
+     * @param page 页码
+     * @param pageSize 每页条数
+     * @param orderState 订单状态，null或0表示查询全部
+     * @return 管理员订单列表结果
+     */
+    AdminOrderListResultDto getOrdersBySiteForAdmin(Integer addressId, Integer page, Integer pageSize, Integer orderState);
 }

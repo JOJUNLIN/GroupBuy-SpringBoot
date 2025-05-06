@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Update;
  * @author: JOJUN-CJL
  * @date: 2025/3/27
  * @Version: 1.0
- * @description:
+ * @description: 用户信息Mapper接口
  */
 
 @Mapper

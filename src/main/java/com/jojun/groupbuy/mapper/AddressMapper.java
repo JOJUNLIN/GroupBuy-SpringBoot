@@ -1,10 +1,7 @@
 package com.jojun.groupbuy.mapper;
 
 import com.jojun.groupbuy.pojo.AddressItem;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -39,4 +36,12 @@ public interface AddressMapper {
             @Result(property = "address", column = "address")
     })
     String findById(int id);
+
+    /**
+     * 新增地址 (站点)
+     * @param addressItem 要新增的地址对象
+     * @return 返回影响的行数，通常是1表示成功
+     */
+    @Insert("INSERT INTO group_address (address, group_num) VALUES (#{address}, #{group_num})")
+    int addAddress(AddressItem addressItem);
 }

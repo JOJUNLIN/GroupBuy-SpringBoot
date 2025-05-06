@@ -21,7 +21,7 @@ import java.util.Map;
  * @description: 订单控制器
  */
 @RestController
-@RequestMapping("/user/order")
+@RequestMapping
 public class OrderController {
 
     @Autowired
@@ -32,7 +32,7 @@ public class OrderController {
      * @param request HTTP请求对象，用于获取请求头中的 token
      * @return 预付订单信息
      */
-    @GetMapping("/pre")
+    @GetMapping("/user/order/pre")
     public Result<OrderPreResult> getOrderPre(HttpServletRequest request) {
         try {
             // 从请求头获取 token
@@ -64,7 +64,7 @@ public class OrderController {
      * @param request HTTP请求对象，用于获取请求头中的 token
      * @return 订单创建结果
      */
-    @PostMapping
+    @PostMapping("/user/order")
     public Result<OrderCreateResult> createOrder(@RequestBody OrderCreateParams params,
                                                  HttpServletRequest request) {
         try {
@@ -106,7 +106,7 @@ public class OrderController {
      * @param request HTTP请求对象，用于获取请求头中的 token
      * @return 订单详情
      */
-    @GetMapping("/{id}")
+    @GetMapping("/user/order/{id}")
     public Result<OrderResult> getOrderById(@PathVariable String id, HttpServletRequest request) {
         try {
             // 从请求头获取 token
@@ -149,7 +149,7 @@ public class OrderController {
      * @param request HTTP请求对象，用于获取请求头中的 token
      * @return 订单列表结果
      */
-    @GetMapping("/list")
+    @GetMapping("/user/order/list")
     public Result<OrderListResult> getOrderList(
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
@@ -175,6 +175,57 @@ public class OrderController {
             return Result.success(result);
         } catch (Exception e) {
             e.printStackTrace();
+            return Result.fail("获取订单列表失败: " + e.getMessage());
+        }
+    }
+
+    // --- 管理员接口 ---
+
+    /**
+     * (管理员) 获取所有订单列表
+     * @param page 页码
+     * @param pageSize 每页数量
+     * @param orderState 订单状态 (可选)
+     * @return 订单列表结果 (使用 AdminOrderListResultDto)
+     */
+    @GetMapping("/attendant/orders")
+    public Result<AdminOrderListResultDto> getAllOrdersForAdmin(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) Integer orderState) {
+//        log.info("Admin request to get all orders. Page: {}, PageSize: {}, State: {}", page, pageSize, orderState);
+        try {
+            AdminOrderListResultDto result = orderService.getAllOrdersForAdmin(page, pageSize, orderState);
+            return Result.success(result);
+        } catch (Exception e) {
+//            log.error("管理员获取所有订单列表失败", e);
+            return Result.fail("获取订单列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * (管理员) 根据站点ID获取订单列表
+     * @param siteId 站点ID (路径参数)
+     * @param page 页码
+     * @param pageSize 每页数量
+     * @param orderState 订单状态 (可选)
+     * @return 订单列表结果 (使用 AdminOrderListResultDto)
+     */
+    @GetMapping("/attendant/orders/site/{siteId}")
+    public Result<AdminOrderListResultDto> getOrdersBySiteForAdmin(
+            @PathVariable("siteId") Integer siteId,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) Integer orderState) {
+//        log.info("Admin request to get orders for siteId: {}. Page: {}, PageSize: {}, State: {}", siteId, page, pageSize, orderState);
+        if (siteId == null) {
+            return Result.fail("站点ID不能为空");
+        }
+        try {
+            AdminOrderListResultDto result = orderService.getOrdersBySiteForAdmin(siteId, page, pageSize, orderState);
+            return Result.success(result);
+        } catch (Exception e) {
+//            log.error("管理员获取站点 {} 的订单列表失败", siteId, e);
             return Result.fail("获取订单列表失败: " + e.getMessage());
         }
     }

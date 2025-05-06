@@ -1,10 +1,7 @@
 package com.jojun.groupbuy.controller;
 
 import com.jojun.groupbuy.pojo.Result;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@RequestMapping("/userpage")
+@RequestMapping("/user")
 public class FirstController {
     @GetMapping("/firstpage")
     public Result<String> firstPage() {
