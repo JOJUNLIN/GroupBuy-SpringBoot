@@ -1,6 +1,9 @@
 package com.jojun.groupbuy.service;
 
 import com.jojun.groupbuy.dto.*;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @interfaceName: OrderService
@@ -70,4 +73,20 @@ public interface OrderService {
      * @return 管理员订单列表结果
      */
     AdminOrderListResultDto getOrdersBySiteForAdmin(Integer addressId, Integer page, Integer pageSize, Integer orderState);
+
+    /**
+     * (管理员 - 发货管理) 批量将指定站点下的一批待发货订单更新为配送中
+     * @param siteId 站点ID
+     * @param orderIds 要发货的订单ID列表
+     * @return 实际更新成功的订单数量
+     */
+    int dispatchOrders(@Param("siteId") Integer siteId, @Param("orderIds") List<String> orderIds);
+
+    /**
+     * (管理员 - 送达管理) 批量将指定站点下的一批配送中订单更新为待收货
+     * @param siteId 站点ID
+     * @param orderIds 要确认送达的订单ID列表
+     * @return 实际更新成功的订单数量
+     */
+    int receiveOrders(@Param("siteId") Integer siteId, @Param("orderIds") List<String> orderIds);
 }

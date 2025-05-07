@@ -47,6 +47,13 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderGoodsMapper orderGoodsMapper;
 
+    // 定义订单状态常量
+    private static final int ORDER_STATE_PENDING_PAYMENT = 1; // 待付款
+    private static final int ORDER_STATE_TO_BE_SHIPPED = 2; // 待发货
+    private static final int ORDER_STATE_TO_BE_RECEIVED = 3; // 待收货
+    private static final int ORDER_STATE_IN_DELIVERY = 4; // 配送中
+    private static final int ORDER_STATE_COMPLETED = 5; // 已完成
+
     /**
      * 获取预付订单信息
      * @param userId 用户ID
@@ -404,5 +411,61 @@ public class OrderServiceImpl implements OrderService {
         // dto.setUserName(userService.getUserNameById(order.getUserId()));
 
         return dto;
+    }
+
+    /**
+     * (管理员 - 发货管理) 批量将指定站点下的一批待发货订单更新为配送中
+     * @param siteId 站点ID
+     * @param orderIds 要发货的订单ID列表
+     * @return 实际更新成功的订单数量
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int dispatchOrders(Integer siteId, List<String> orderIds) {
+        if (siteId == null) {
+            throw new IllegalArgumentException("站点ID不能为空");
+        }
+        if (orderIds == null || orderIds.isEmpty()) {
+            // 没有订单需要处理，返回0成功更新
+            return 0;
+        }
+
+        // 批量更新订单状态：从 待发货(2) -> 配送中(4)
+        int updatedCount = orderMapper.batchUpdateOrderStateByAddressIdAndCurrentState(
+                orderIds,
+                ORDER_STATE_IN_DELIVERY, // 目标状态
+                siteId,
+                ORDER_STATE_TO_BE_SHIPPED // 要求当前状态是待发货
+        );
+
+        return updatedCount;
+    }
+
+    /**
+     * (管理员 - 送达管理) 批量将指定站点下的一批配送中订单更新为待收货
+     * @param siteId 站点ID
+     * @param orderIds 要确认送达的订单ID列表
+     * @return 实际更新成功的订单数量
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int receiveOrders(Integer siteId, List<String> orderIds) {
+        if (siteId == null) {
+            throw new IllegalArgumentException("站点ID不能为空");
+        }
+        if (orderIds == null || orderIds.isEmpty()) {
+            // 没有订单需要处理，返回0成功更新
+            return 0;
+        }
+
+        // 批量更新订单状态：从 配送中(4) -> 待收货(3)
+        int updatedCount = orderMapper.batchUpdateOrderStateByAddressIdAndCurrentState(
+                orderIds,
+                ORDER_STATE_TO_BE_RECEIVED, // 目标状态
+                siteId,
+                ORDER_STATE_IN_DELIVERY // 要求当前状态是配送中
+        );
+
+        return updatedCount;
     }
 }

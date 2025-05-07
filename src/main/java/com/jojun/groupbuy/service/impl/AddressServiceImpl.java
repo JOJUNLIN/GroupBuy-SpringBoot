@@ -1,6 +1,7 @@
 package com.jojun.groupbuy.service.impl;
 
 import com.jojun.groupbuy.mapper.AddressMapper;
+import com.jojun.groupbuy.mapper.OrderMapper;
 import com.jojun.groupbuy.pojo.AddressItem;
 import com.jojun.groupbuy.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,37 @@ public class AddressServiceImpl implements AddressService {
     @Autowired
     private AddressMapper addressMapper;
 
+    @Autowired
+    private OrderMapper orderMapper;
+
+    // 定义待发货状态码常量，方便维护
+    private static final int ORDER_STATE_TO_BE_SHIPPED = 2;
+
     /**
-     * 获取用户地址列表
-     * @return 地址列表
+     * 获取用户地址列表 (站点列表)，并实时更新每个站点的拼团数 (待发货商品总数)
+     * @return 更新了拼团数的地址列表
      */
     @Override
     public List<AddressItem> getAddressList() {
-        return addressMapper.findAddress();
+        // 1. 获取所有基础的站点信息
+        List<AddressItem> addressList = addressMapper.findAddress();
+
+        // 2. 遍历每个站点，查询并更新其 group_num (待发货商品总数)
+        if (addressList != null && !addressList.isEmpty()) {
+            for (AddressItem site : addressList) {
+                if (site.getId() != null) {
+                    // 查询该站点下，状态为“待发货”的订单商品总数
+                    Integer groupNum = orderMapper.sumProductCountByAddressIdAndOrderState(
+                            site.getId(),
+                            ORDER_STATE_TO_BE_SHIPPED
+                    );
+                    site.setGroup_num(groupNum); // 更新 AddressItem 对象的 group_num
+                } else {
+                    site.setGroup_num(0); // 如果站点ID为空，默认拼团数为0
+                }
+            }
+        }
+        return addressList;
     }
 
     /**
@@ -43,10 +68,8 @@ public class AddressServiceImpl implements AddressService {
         if (addressItem == null || addressItem.getAddress() == null || addressItem.getAddress().trim().isEmpty()) {
             throw new IllegalArgumentException("站点地址不能为空");
         }
-        // 如果前端没有传递 group_num，设置默认值
-        if (addressItem.getGroup_num() == null) {
-            addressItem.setGroup_num(0); // 默认为0
-        }
+
+        addressItem.setGroup_num(0); // 默认为0
 
         // 检查站点名称是否已存在
         // 需要先在 AddressMapper 中添加一个 findByAddressName(String addressName) 的方法
@@ -57,8 +80,6 @@ public class AddressServiceImpl implements AddressService {
 
         int affectedRows = addressMapper.addAddress(addressItem);
         if (affectedRows > 0) {
-            // 由于在Mapper中使用了 @Options(useGeneratedKeys = true, keyProperty = "id")
-            // 此时 addressItem.getId() 已经包含了数据库生成的ID
             return addressItem;
         } else {
             // 理论上，如果没有其他数据库错误，这种情况不应该发生

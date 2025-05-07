@@ -162,4 +162,42 @@ public interface OrderMapper {
             "</script>")
     Long countOrdersByAddressIdForAdmin(@Param("addressId") Integer addressId,
                                         @Param("orderState") Integer orderState);
+
+    /**
+     * 根据站点ID和订单状态，计算这些订单中所有商品的总数量。
+     * 这需要连接 order 表和 order_goods 表。
+     * @param addressId 站点ID (对应 order.address_id)
+     * @param orderState 订单状态
+     * @return 商品总数，如果没有任何匹配的订单或商品，则返回0
+     */
+    @Select("SELECT IFNULL(SUM(og.count), 0) " +
+            "FROM `order` o " +
+            "JOIN order_goods og ON o.id = og.order_id " +
+            "WHERE o.address_id = #{addressId} AND o.order_state = #{orderState}")
+    Integer sumProductCountByAddressIdAndOrderState(@Param("addressId") Integer addressId,
+                                                    @Param("orderState") Integer orderState);
+
+    /**
+     * 根据站点ID、订单状态列表和当前状态，批量更新订单状态
+     * 用于管理员批量发货或确认送达
+     * @param orderIds 要更新的订单ID列表
+     * @param targetState 目标订单状态
+     * @param addressId 站点ID
+     * @param currentState 订单当前应处于的状态，更新时进行校验
+     * @return 实际更新成功的订单数量
+     */
+    @Update("<script>" +
+            "UPDATE `order` SET order_state = #{targetState}, update_time = NOW() " +
+            "WHERE id IN " +
+            "<foreach collection='orderIds' item='id' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            "AND address_id = #{addressId} " + // 确保是该站点的订单
+            "AND order_state = #{currentState}" + // 确保订单当前状态正确
+            "</script>")
+    int batchUpdateOrderStateByAddressIdAndCurrentState(
+            @Param("orderIds") List<String> orderIds,
+            @Param("targetState") Integer targetState,
+            @Param("addressId") Integer addressId,
+            @Param("currentState") Integer currentState);
 }

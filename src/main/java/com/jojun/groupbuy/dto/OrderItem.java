@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class OrderItem extends OrderResult {
-    /** 总件数 */
+    /** 每个订单中的商品总件数 */
     private Integer totalNum;
 
     // 因为继承了OrderResult，不需要重复定义其他字段
